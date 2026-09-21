@@ -6,17 +6,19 @@ from db import fetchall
 
 app = FastAPI()
 
-@app.get("/api/ordini/{citta}")
-def get_ordini_by_city(citta: str):
+@app.get("/api/iscrizioni/{citta}")
+def get_iscrizioni_by_city(citta: str):
     citta_clean = citta.strip().lower()
 
     result = fetchall(
                         """
-                        SELECT *
-                        FROM ordini AS o
-                        JOIN carrello AS ca ON o.id_carrello = ca.id_carrello
-                        JOIN utenti AS u ON ca.id_utente = u.id_utente 
-                        WHERE LOWER(u.citta) = %s
+                       SELECT iscrizioni.id AS ID_Iscrizione, utenti.nome, utenti.cognome, utenti.citta, articoli.descrizione, articoli.prezzo
+                        FROM iscrizioni, articoli, contiene, carrello, utenti
+                        WHERE iscrizioni.id = articoli.id
+                        AND articoli.id = contiene.id_articolo
+                        AND contiene.id_carrello = carrello.id_carrello
+                        AND carrello.id_utente = utenti.id_utente
+                        AND utenti.citta = %s
                         """
                         , [citta_clean]
                         )
